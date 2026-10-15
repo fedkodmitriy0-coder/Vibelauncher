@@ -33,11 +33,18 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p = Path("project/app/build.gradle.kts")
-          s = p.read_text()
-          s = s.replace("JavaVersion.VERSION_1_8", "JavaVersion.VERSION_17")
-          s = s.replace('jvmTarget = "1.8"', 'jvmTarget = "17"')
-          p.write_text(s)
+
+          root = Path("project")
+          files = list(root.rglob("*.gradle")) + list(root.rglob("*.gradle.kts"))
+
+          for p in files:
+              s = p.read_text()
+              s = s.replace("JavaVersion.VERSION_1_8", "JavaVersion.VERSION_17")
+              s = s.replace("VERSION_1_8", "VERSION_17")
+              s = s.replace('"1.8"', '"17"')
+              s = s.replace("'1.8'", "'17'")
+              p.write_text(s)
+              print("Checked:", p)
           PY
 
       - name: Build APK
