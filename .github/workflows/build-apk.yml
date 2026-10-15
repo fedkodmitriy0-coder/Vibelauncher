@@ -34,17 +34,23 @@ jobs:
           python3 - <<'PY'
           from pathlib import Path
 
-          root = Path("project")
-          files = list(root.rglob("*.gradle")) + list(root.rglob("*.gradle.kts"))
+          p = Path("project/app/build.gradle.kts")
+          s = p.read_text()
 
-          for p in files:
-              s = p.read_text()
-              s = s.replace("JavaVersion.VERSION_1_8", "JavaVersion.VERSION_17")
-              s = s.replace("VERSION_1_8", "VERSION_17")
-              s = s.replace('"1.8"', '"17"')
-              s = s.replace("'1.8'", "'17'")
-              p.write_text(s)
-              print("Checked:", p)
+          s += """
+
+          tasks.withType<org.gradle.api.tasks.compile.JavaCompile>().configureEach {
+              sourceCompatibility = "17"
+              targetCompatibility = "17"
+          }
+
+          tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
+              kotlinOptions.jvmTarget = "17"
+          }
+          """
+
+          p.write_text(s)
+          print("Java and Kotlin targets set to 17")
           PY
 
       - name: Build APK
